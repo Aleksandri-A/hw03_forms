@@ -29,7 +29,6 @@ def group_list(request, slug):
     return render(request, 'posts/group_list.html', context)
 
 
-@login_required
 def index(request):
     post_list = Post.objects.all().order_by('-pub_date')
     paginator = Paginator(post_list, COUNT)
@@ -94,6 +93,7 @@ def post_create(request):
     return render(request, template, context)
 
 
+@login_required
 def post_edit(request, post_id):
     is_edit = True
     template = 'posts/create_post.html'
@@ -112,7 +112,7 @@ def post_edit(request, post_id):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
-            return redirect('posts:profile', (request.user.username))
+            return redirect('posts:post_detail', (post.pk))
         return render(request, template, context)
 
     return redirect('posts:post_detail', (post.pk))

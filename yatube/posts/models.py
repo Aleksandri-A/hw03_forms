@@ -31,17 +31,3 @@ class Post(models.Model):
 
     def __str__(self):
         return self.text
-
-
-class PostForm(models.Model):
-    text = models.TextField()
-    group = models.ForeignKey(
-        Group,
-        related_name='users',
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True
-    )
-
-    def __str__(self):
-        return self.text
