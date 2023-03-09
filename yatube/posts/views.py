@@ -24,7 +24,8 @@ def group_list(request, slug):
         'group': group,
         'posts': posts,
         'title': title,
-        'h1': group.description,
+        'h1': group.title,
+        'description': group.description,
     }
     return render(request, 'posts/group_list.html', context)
 

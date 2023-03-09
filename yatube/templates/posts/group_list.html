@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+  <p>{{ description }}</p>
   {% for post in page_obj %}
     <article>
       <p>{{ post.group }}</p>
