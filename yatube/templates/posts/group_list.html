@@ -13,6 +13,8 @@
         </li>
       </ul>
       <p>{{ post.text }}</p> 
+      <a href="{% url 'posts:post_detail' post.pk %}">подробная информация </a><br>
+      <a href="{% url 'posts:profile' post.author.username %}">профиль автора </a>
       {% if not forloop.last %}<hr>{% endif %}
     </article>
   {% endfor %}
