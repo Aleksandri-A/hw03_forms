@@ -8,13 +8,13 @@ from .models import Post, Group, User
 
 from .forms import PostForm
 
-
 COUNT = 10
 
 
 def group_list(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    paginator = Paginator(group.posts.order_by('-pub_date'), COUNT)
+    posts = group.posts.select_related('author', 'group')
+    paginator = Paginator(posts, COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     title = 'Записи группы: ' + str(group)
@@ -27,9 +27,8 @@ def group_list(request, slug):
     }
     return render(request, 'posts/group_list.html', context)
 
-
 def index(request):
-    post_list = Post.objects.all().order_by('-pub_date')
+    post_list = Post.objects.select_related('author','group')
     paginator = Paginator(post_list, COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -41,11 +40,10 @@ def index(request):
     }
     return render(request, 'posts/index.html', context)
 
-
 def profile(request, username):
     # Здесь код запроса к модели и создание словаря контекста
     user = get_object_or_404(User, username=username)
-    post_list = Post.objects.filter(author=user).order_by('-pub_date')
+    post_list = Post.objects.filter(author=user).select_related('author','group')
     paginator = Paginator(post_list, COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -54,11 +52,10 @@ def profile(request, username):
         'h1': 'Все посты пользователя ' + str(user.get_full_name()),
         'title': 'Профайл пользователя ' + str(user.get_full_name()),
         'page_obj': page_obj,
-        'h3': post_list.count,
+        'h3': page_obj.paginator.count,
         'posts': post_list,
     }
     return render(request, 'posts/profile.html', context)
-
 
 def post_detail(request, post_id):
     one_post = get_object_or_404(Post, id=post_id)
@@ -69,7 +66,6 @@ def post_detail(request, post_id):
         'is_author': is_author,
     }
     return render(request, 'posts/post_detail.html', context)
-
 
 @login_required
 def post_create(request):
@@ -90,22 +86,12 @@ def post_create(request):
     post.save()
     return redirect('posts:profile', (request.user.username))
 
-    # if request.method == 'POST':
-    #     if form.is_valid():
-    #         post = form.save(commit=False)
-    #         post.author = request.user
-    #         post.save()
-    #         return redirect('posts:profile', (request.user.username))
-    #     return render(request, template, context)
-    # return render(request, template, context)
-
-
 @login_required
 def post_edit(request, post_id):
     is_edit = True
     template = 'posts/create_post.html'
     post = get_object_or_404(Post, id=post_id)
-    form = PostForm(request.POST, instance=post)
+    form = PostForm(request.POST or None, instance=post)
     groups = Group.objects.all().order_by('title')
     context = {
         'title': 'Редактирование поста',
@@ -118,17 +104,5 @@ def post_edit(request, post_id):
         return redirect('posts:post_detail', (post.pk))
     if request.method != 'POST':
         return render(request, template, context)
-    post = form.save(commit=False)
-    post.author = request.user
-    post.save()
+    post = form.save()
     return redirect('posts:post_detail', (post.pk))
-
-    # if post.author == request.user:
-    #     if request.method == 'POST':
-    #         post = form.save(commit=False)
-    #         post.author = request.user
-    #         post.save()
-    #         return redirect('posts:post_detail', (post.pk))
-    #     return render(request, template, context)
-
-    # return redirect('posts:post_detail', (post.pk))
