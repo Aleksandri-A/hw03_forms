@@ -27,8 +27,9 @@ def group_list(request, slug):
     }
     return render(request, 'posts/group_list.html', context)
 
+
 def index(request):
-    post_list = Post.objects.select_related('author','group')
+    post_list = Post.objects.select_related('author', 'group')
     paginator = Paginator(post_list, COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -40,10 +41,12 @@ def index(request):
     }
     return render(request, 'posts/index.html', context)
 
+
 def profile(request, username):
     # Здесь код запроса к модели и создание словаря контекста
     user = get_object_or_404(User, username=username)
-    post_list = Post.objects.filter(author=user).select_related('author','group')
+    post_list = Post.objects.filter(author=user).select_related(
+        'author', 'group')
     paginator = Paginator(post_list, COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -57,6 +60,7 @@ def profile(request, username):
     }
     return render(request, 'posts/profile.html', context)
 
+
 def post_detail(request, post_id):
     one_post = get_object_or_404(Post, id=post_id)
     is_author = request.user == one_post.author
@@ -66,6 +70,7 @@ def post_detail(request, post_id):
         'is_author': is_author,
     }
     return render(request, 'posts/post_detail.html', context)
+
 
 @login_required
 def post_create(request):
@@ -85,6 +90,7 @@ def post_create(request):
     post.author = request.user
     post.save()
     return redirect('posts:profile', (request.user.username))
+
 
 @login_required
 def post_edit(request, post_id):
